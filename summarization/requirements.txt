@@ -1,0 +1,10 @@
+gradio
+nltk
+scipy
+torch
+transformers
+tokenizers
+overrides
+datasets
+wandb
+rouge_score
