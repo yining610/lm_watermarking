@@ -123,3 +123,26 @@ class CNNGenerationProcessor(Preprocessor):
             "inputs": inputs,
             "untruncated_inputs": untruncated_inputs
         }
+    
+class CNNSummarizationProcessor(Preprocessor):
+    """Prepare CNN dataset for summarization
+    """
+    def __init__(self,
+                 batch_size: int,
+                 prompt: Text):
+        super().__init__(batched=True)
+        
+        self.batch_size = batch_size
+        self.prompt = prompt
+        self.template = "{prompt} {text}"
+
+    def _call(self, examples: Dict[Text, Any], *args, **kwargs) -> Dict[Text, Any]:
+
+        templated_text = [
+            self.template.format(prompt=self.prompt, text=article)
+            for article in examples['text']
+        ]
+        
+        return {
+            "input_text": templated_text,
+        }

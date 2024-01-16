@@ -41,7 +41,7 @@ class GenerationRouge(Metric):
     def compute(self) -> float:
         
         preds = self.tokenizer.batch_decode(self.predictions, skip_special_tokens=True)
-        labels = self.tokenizer.batch_decode(self.labels, skip_special_tokens=True) if isinstance(self.labels[0], int) else self.labels
+        labels = self.tokenizer.batch_decode(self.labels, skip_special_tokens=True)
         
         self.reset()
         

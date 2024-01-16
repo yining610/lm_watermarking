@@ -6,8 +6,10 @@ import click
 import os
 import datasets
 
-from summarization.src.processors.cnn_processor import CNNGenerationProcessor
-
+from summarization.src.processors.cnn_processor import (
+    CNNGenerationProcessor,
+    CNNSummarizationProcessor
+)
 __REGISTRY__ = {
     "cnn_generation": [
         {   
@@ -18,6 +20,16 @@ __REGISTRY__ = {
                 "min_sample_len": 0,      # default value same as in the original code
                 "min_prompt_len": 50,     # default value same as in the original code
                 "max_new_tokens": 200     # default value same as in the original code
+            }
+        }
+    ],
+    "cnn_summarization": [
+        {
+            "path": "cnn_dailymail",
+            "cls": CNNSummarizationProcessor,
+            "params": {
+                "batch_size": 64,
+                "prompt": "Summarize the following article: "
             }
         }
     ]

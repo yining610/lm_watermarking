@@ -30,10 +30,10 @@ def main(dataset_dir,
          gamma,
          delta,
          seeding_scheme):
-    """Complete the text given a prompt.
+    """Summarize the text given a prompt.
     """
     
-    params = get_params(task_name="generation",
+    params = get_params(task_name="summarization",
                         dataset_dir=dataset_dir,
                         model_name=model_name,
                         train_sample=train_sample,
@@ -49,13 +49,13 @@ def main(dataset_dir,
     dataloader_train: DataLoader = params["dataloader_train"]
     dataloader_eval: DataLoader = params["dataloader_eval"]
 
-    # # evaluate before training
-    # eval_dict = trainer.evaluate(
-    #     dataloader=dataloader_eval,
-    #     epoch=0
-    # )
+    # evaluate before training
+    eval_dict = trainer.evaluate(
+        dataloader=dataloader_eval,
+        epoch=0
+    )
 
-    # print(eval_dict)
+    print(eval_dict)
 
     # train and evaluate. The evaluation results are stored in trainer.save_dir
     trainer.train(

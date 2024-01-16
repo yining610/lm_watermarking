@@ -11,7 +11,7 @@ class AvgSipkeEntropy(Metric):
     def __init__(self):
         """
         """
-        super().__init__(name="avg_spike_entropy")
+        super().__init__(name="spike_entropy")
         self.entropy = []
         
     @overrides
@@ -35,4 +35,7 @@ class AvgSipkeEntropy(Metric):
         return_ent = np.array(self.entropy).mean().item()
         self.reset()
         
-        return return_ent
+        return {
+            "avg_spike_entropy": return_ent,
+            "min_spike_entropy": np.array(self.entropy).min().item(),
+        }

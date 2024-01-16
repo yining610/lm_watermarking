@@ -101,12 +101,15 @@ class Trainer:
         """Given a dataloader, evaluate the model.
         """
         self.model.eval()
-        
+        self.eval_outputs = torch.tensor([])
         with torch.no_grad():
             for batch in tqdm(dataloader):
                 # batch = {k: v.to(self.device) if isinstance(v, torch.Tensor) else v for k, v in batch.items()}
                 batch = move_to_device(batch, self.device)
                 eval_step_outputs = self._eval_step(batch)
+
+                predictions = eval_step_outputs['predictions'].detach().cpu()
+                self.eval_outputs = torch.cat([self.eval_outputs, predictions], dim=0)
                 
                 for metric_name, metric in self.eval_metrics.items():
                     metric(eval_step_outputs)
@@ -114,7 +117,7 @@ class Trainer:
         self.model.train()
         
         # now compute the metrics
-        return {metric_name: metric.compute() for metric_name, metric in self.eval_metrics.items()}
+        return {metric_name: metric.compute() for metric_name, metric in self.eval_metrics.items()}     
     
     def save_metrics(
         self,

@@ -7,7 +7,7 @@ from .trainer import Trainer
 from ..metrics.metric import Metric
 from transformers import LogitsProcessor, LogitsProcessorList
 
-class CNNTrainer(Trainer):
+class T5CNNTrainer(Trainer):
     def __init__(
         self,
         model: torch.nn.Module,
@@ -46,17 +46,18 @@ class CNNTrainer(Trainer):
     
     @overrides
     def _eval_step(self, batch: Dict[Text, Any]) -> Dict[Text, Any]:
+
         labels = batch.pop("labels")
+        
         self.logits_processor._get_encoder_input_ids(batch["input_ids"])
-        print(batch["input_ids"])
         model_outputs = self.model.generate(**batch, 
                                             logits_processor=LogitsProcessorList([self.logits_processor]))
-        # get spike entropies: 1 x seq_len
-        spike_entropies = self.logits_processor._get_and_clear_stored_spike_ents()
+        
+        spike_entropies = torch.tensor(self.logits_processor._get_and_clear_stored_spike_ents())
+
         return {
             "predictions": model_outputs,
             "labels": labels,
             "spike_entropies": spike_entropies,
         }
-    
     
