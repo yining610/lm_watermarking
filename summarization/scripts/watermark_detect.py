@@ -12,12 +12,11 @@ __CACHE_DIR__ = os.environ.get("CACHE_DIR")
 
 @click.command()
 @click.option("--dataset-dir", type=click.Path(exists=True), help="Path to the dataset directory.")
-@click.option("--model-name",  type=click.Choice(["gpt-4", "gpt-3.5-turbo", "t5-large", "gpt2"]), help="The model to use.")
-@click.option("--min-spike-entropy", type=click.FLOAT, default=0.6385, help="The minimum spike entropy.)") # TODO: pass this number automatically
+@click.option("--model-name",  type=click.STRING, help="The model to use.")
+# @click.option("--min-spike-entropy", type=click.FLOAT, default=0.6385, help="The minimum spike entropy.)") # TODO: pass this number automatically
 
 def main(dataset_dir,
-         model_name,
-         min_spike_entropy):
+         model_name):
     """Detect the watermark in the text.
     """
     dataset = torch.load(os.path.join(dataset_dir, "eval_outputs.pt"))
@@ -27,11 +26,11 @@ def main(dataset_dir,
     batch_text = tokenizer.batch_decode(dataset.int(), skip_special_tokens=True)
     watermark_detector = WatermarkDetector(vocab=list(tokenizer.get_vocab().values()),
                                            delta=2.0,
-                                           gamma=0.25,                # should match original setting
+                                           gamma=0.5,                # should match original setting
                                            seeding_scheme="selfhash", # should match original setting
                                            device="cuda:0",           # must match the original rng device type
                                            tokenizer=tokenizer,
-                                           z_threshold=2.0,
+                                           z_threshold=3.0,
                                            normalizers=[],
                                            ignore_repeated_ngrams=True)
     
@@ -44,9 +43,9 @@ def main(dataset_dir,
     # perform analysis
     compute_avg(outputs)
     compute_confusion_matrix(outputs)
-    compute_min_expected_green_tokens(watermark_detector.delta, 
-                                      watermark_detector.gamma, 
-                                      min_spike_entropy)
+    # compute_min_expected_green_tokens(watermark_detector.delta, 
+    #                                   watermark_detector.gamma, 
+    #                                   min_spike_entropy)
 
 if __name__ == "__main__":
     main()

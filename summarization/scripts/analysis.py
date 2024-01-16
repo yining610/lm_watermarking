@@ -1,8 +1,8 @@
 import json
 import math
-from typing import List, Text, Any
+from typing import List, Text, Any, Dict
 
-def compute_avg(data: List[Text, Any]):
+def compute_avg(data: List[Dict[Text, Any]]):
     
     avg_num_tokens_scored = [x['num_tokens_scored'] for x in data]
     avg_num_green_tokens = [x['num_green_tokens'] for x in data]
@@ -19,10 +19,10 @@ def compute_avg(data: List[Text, Any]):
     print(f"Average p-value: {sum(avg_p_value) / len(avg_p_value)}")
     print(f"Average prediction: {sum(avg_prediction) / len(avg_prediction)}")
 
-def compute_confusion_matrix(data: List[Text, Any]):
+def compute_confusion_matrix(data: List[Dict[Text, Any]]):
    
     for example in data:
-        example['label'] = 1
+        example['label'] = 0 # do not reject the null hypothesis (always watermarked)
 
     true_positives = 0
     true_negatives = 0
@@ -30,20 +30,20 @@ def compute_confusion_matrix(data: List[Text, Any]):
     false_negatives = 0
 
     for example in data:
-        if example['prediction'] == 1 and example['label'] == 1:
+        if example['prediction'] == 0 and example['label'] == 0:
             true_positives += 1
-        elif example['prediction'] == 0 and example['label'] == 0:
+        elif example['prediction'] == 1 and example['label'] == 1:
             true_negatives += 1
-        elif example['prediction'] == 1 and example['label'] == 0:
-            false_positives += 1
         elif example['prediction'] == 0 and example['label'] == 1:
+            false_positives += 1
+        elif example['prediction'] == 1 and example['label'] == 0:
             false_negatives += 1
         else:
             raise ValueError(f"Invalid example: {example}")
 
     print(f"True positive rate: {true_positives / (true_positives + false_negatives)}")
-    print(f"True negative rate: 0.0")  # always positive (watermarked)
-    print(f"False positive rate: 1.0") # always positive (watermarked)
+    print(f"True negative rate: {true_negatives / (true_negatives + false_positives) if true_negatives + false_positives > 0 else 1}")
+    print(f"False positive rate: {false_positives / (false_positives + true_negatives) if false_positives + true_negatives > 0 else 0}")
     print(f"False negative rate: {false_negatives / (false_negatives + true_positives)}")
 
 def compute_min_expected_green_tokens(delta: float, gamma: float, min_spike_entropy: float):

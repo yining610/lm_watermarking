@@ -18,6 +18,7 @@ from summarization.src.trainers.trainer import Trainer
 @click.option("--gamma", type=click.FLOAT, default=0.25, help="The gamma parameter controlling gree list ratio")
 @click.option("--delta", type=click.FLOAT, default=2.0, help="The delta parameter smoothing the logits")
 @click.option("--seeding-scheme", type=click.Choice(["selfhash", "simple_1"]), default="selfhash", help="The seeding scheme to use")
+@click.option("--do-eval", is_flag=True, help="Whether to only evaluate the finetuned model")
 
 def main(dataset_dir,
          model_name,
@@ -29,8 +30,9 @@ def main(dataset_dir,
          output_dir,
          gamma,
          delta,
-         seeding_scheme):
-    """Summarize the text given a prompt.
+         seeding_scheme,
+         do_eval):
+    """Complete the text given a prompt.
     """
     
     params = get_params(task_name="summarization",
@@ -43,13 +45,14 @@ def main(dataset_dir,
                         output_dir=output_dir,
                         gamma=gamma,
                         delta=delta,
-                        seeding_scheme=seeding_scheme)
+                        seeding_scheme=seeding_scheme,
+                        do_eval=do_eval)
     
     trainer: Trainer = params["trainer"]
     dataloader_train: DataLoader = params["dataloader_train"]
     dataloader_eval: DataLoader = params["dataloader_eval"]
 
-    # evaluate before training
+    # evaluate
     eval_dict = trainer.evaluate(
         dataloader=dataloader_eval,
         epoch=0
@@ -57,13 +60,15 @@ def main(dataset_dir,
 
     print(eval_dict)
 
-    # train and evaluate. The evaluation results are stored in trainer.save_dir
-    trainer.train(
-        dataloader=dataloader_train,
-        eval_dataloader=dataloader_eval,
-        epochs=epochs,
-        patience=3,
-    )
+    if not do_eval:
+        # train and evaluate. The evaluation results are stored in trainer.save_dir
+        trainer.train(
+            dataloader=dataloader_train,
+            eval_dataloader=dataloader_eval,
+            epochs=epochs,
+            patience=3,
+        )
+
 
     # store eval outputs for later watermarking detection
     torch.save(trainer.eval_outputs,

@@ -50,7 +50,8 @@ class T5CNNTrainer(Trainer):
         labels = batch.pop("labels")
         
         self.logits_processor._get_encoder_input_ids(batch["input_ids"])
-        model_outputs = self.model.generate(**batch, 
+        model_outputs = self.model.generate(**batch,
+                                            do_sample=True, 
                                             logits_processor=LogitsProcessorList([self.logits_processor]))
         
         spike_entropies = torch.tensor(self.logits_processor._get_and_clear_stored_spike_ents())

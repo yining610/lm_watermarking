@@ -38,6 +38,7 @@ def get_params(
     gamma: float = 0.25,
     delta: float = 2.0,
     seeding_scheme: Text = "selfhash",
+    do_eval: bool = False,
 ):
     
     if "cnn" in dataset_dir:
@@ -51,10 +52,14 @@ def get_params(
     else:
         raise ValueError("Dataset currently not supported.")
     
-    wandb.init(project="watermark", 
-               name=f"{data_name}_{model_name}_{task_name}")
-    
-    model = HuggingfaceWrapperModule(model_handle=model_name)
+    if not do_eval:
+        wandb.init(project="watermark", 
+                   name=f"{data_name}_{model_name}_{task_name}")
+        model = HuggingfaceWrapperModule(model_handle=model_name)
+    else:
+        model = HuggingfaceWrapperModule.load_from_dir(
+                    f"{output_dir}/{task_name}/{data_name}_{model_name}/best_1"
+            )
         
     tokenizer = transformers.AutoTokenizer.from_pretrained(model_name, 
                                                            cache_dir=__CACHE_DIR__)
